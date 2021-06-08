@@ -123,6 +123,7 @@ func main() {
 	http.HandleFunc("/hello-world", helloWorldHandler)
 
 	http.HandleFunc("/payment-codes", paymentCodeRouteHandler)
+	http.HandleFunc("/payment-codes/", paymentCodeRouteHandler)
 
 	http.HandleFunc("/", notFoundHandler)
 

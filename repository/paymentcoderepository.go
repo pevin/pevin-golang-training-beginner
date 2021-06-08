@@ -51,8 +51,8 @@ func (r PaymentCodeRepository) Get(ctx context.Context, id string) (paymentCode 
 	for rows.Next() {
 		if err := rows.Scan(
 			&paymentCode.Id,
-			&paymentCode.Name,
 			&paymentCode.PaymentCode,
+			&paymentCode.Name,
 			&paymentCode.Status,
 		); err != nil {
 			log.Fatal(err)
