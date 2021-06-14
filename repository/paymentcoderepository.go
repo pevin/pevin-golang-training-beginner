@@ -11,8 +11,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type IPaymentCodeRepository interface {
+	Create(ctx context.Context, p *model.PaymentCode) (err error)
+	Get(ctx context.Context, id string) (paymentCode model.PaymentCode, err error)
+}
+
 type PaymentCodeRepository struct {
-	db *sql.DB
+	Db *sql.DB
 }
 
 func (r PaymentCodeRepository) Create(ctx context.Context, p *model.PaymentCode) (err error) {
@@ -64,7 +69,7 @@ func (r PaymentCodeRepository) Get(ctx context.Context, id string) (paymentCode 
 }
 
 func (r PaymentCodeRepository) getDB() *sql.DB {
-	if r.db == nil {
+	if r.Db == nil {
 		dbHost := os.Getenv("DB_HOST")
 		dbPort := os.Getenv("DB_PORT")
 		dbUser := os.Getenv("DB_USER")
@@ -84,8 +89,8 @@ func (r PaymentCodeRepository) getDB() *sql.DB {
 		if err != nil {
 			panic(err)
 		}
-		r.db = db
+		r.Db = db
 	}
 
-	return r.db
+	return r.Db
 }

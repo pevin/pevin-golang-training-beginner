@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"pevin-golang-training-beginner/model"
+	"pevin-golang-training-beginner/producer"
 	"pevin-golang-training-beginner/repository"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 )
 
 type PaymentCodeUseCase struct {
+	Repo     repository.IPaymentCodeRepository
+	Producer producer.IPaymentCodeMessageProducer
 }
 
 func (u PaymentCodeUseCase) InitFromRequest(r *http.Request) (paymentCode model.PaymentCode, err error) {
@@ -42,16 +45,24 @@ func (u PaymentCodeUseCase) Create(ctx context.Context, paymentCode *model.Payme
 
 	paymentCode.Status = model.PAYMENT_CODE_STATUS_ACTIVE
 
-	repo := repository.PaymentCodeRepository{}
-	repo.Create(ctx, paymentCode)
+	err = u.Repo.Create(ctx, paymentCode)
+
+	if err != nil {
+		return
+	}
+
+	err = u.Producer.Produce(paymentCode)
 
 	return
 }
 
 func (u PaymentCodeUseCase) Get(ctx context.Context, id string) (p model.PaymentCode, err error) {
-	repo := repository.PaymentCodeRepository{}
+	p, err = u.Repo.Get(ctx, id)
+	if err != nil {
+		return
+	}
 
-	p, err = repo.Get(ctx, id)
+	err = u.Producer.Produce(&p)
 
 	return
 }
