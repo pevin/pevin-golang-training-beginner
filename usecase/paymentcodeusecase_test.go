@@ -3,189 +3,256 @@ package usecase
 import (
 	"context"
 	"errors"
-	"testing"
-
 	mock_producer "pevin-golang-training-beginner/mock/producer"
 	mock_repository "pevin-golang-training-beginner/mock/repository"
 	"pevin-golang-training-beginner/model"
+	"pevin-golang-training-beginner/producer"
+	"pevin-golang-training-beginner/repository"
+	"reflect"
+	"testing"
 
 	"github.com/golang/mock/gomock"
 )
 
-func TestCreate(t *testing.T) {
+func TestPaymentCodeUseCase_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	defer ctrl.Finish()
-
-	mRepo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
-	mProducer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
-
-	model := model.PaymentCode{
-		PaymentCode: "test-payment-code",
-		Name:        "test name",
-		Status:      "test-status",
-	}
-	mRepo.
-		EXPECT().
-		Create(gomock.Any(), gomock.Any()).
-		Return(nil)
-	mProducer.
-		EXPECT().
-		Produce(gomock.Any()).
-		Return(nil)
-
-	usecase := PaymentCodeUseCase{Repo: mRepo, Producer: mProducer}
-
-	got := usecase.Create(context.TODO(), &model)
-
-	if got != nil {
-		t.Errorf("got %q, wanted nil", got)
-	}
-}
-
-func TestCreateWithErrorInRepo(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	defer ctrl.Finish()
-
-	mRepo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
-	mProducer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
-
-	model := model.PaymentCode{
-		PaymentCode: "test-payment-code",
-		Name:        "test name",
-		Status:      "test-status",
-	}
 
 	err := errors.New("Mock Error")
-	mRepo.
-		EXPECT().
-		Create(gomock.Any(), gomock.Any()).Return(err)
 
-	usecase := PaymentCodeUseCase{Repo: mRepo, Producer: mProducer}
-
-	got := usecase.Create(context.TODO(), &model)
-
-	if got == nil {
-		t.Errorf("got %q, wanted error", got)
+	type fields struct {
+		Repo     repository.IPaymentCodeRepository
+		Producer producer.IPaymentCodeMessageProducer
+	}
+	type args struct {
+		ctx         context.Context
+		paymentCode *model.PaymentCode
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "get-success",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						Create(gomock.Any(), gomock.Any()).
+						Return(nil)
+					return repo
+				}(),
+				Producer: func() producer.IPaymentCodeMessageProducer {
+					producer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
+					producer.
+						EXPECT().
+						Produce(gomock.Any()).
+						Return(nil)
+					return producer
+				}(),
+			},
+			args: args{
+				ctx: context.TODO(),
+				paymentCode: &model.PaymentCode{
+					PaymentCode: "test-payment-code",
+					Name:        "test name",
+					Status:      "test-status",
+				},
+			},
+		},
+		{
+			name: "with-error-in-repo",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						Create(gomock.Any(), gomock.Any()).
+						Return(err)
+					return repo
+				}(),
+				Producer: func() producer.IPaymentCodeMessageProducer {
+					producer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
+					return producer
+				}(),
+			},
+			args: args{
+				ctx: context.TODO(),
+				paymentCode: &model.PaymentCode{
+					PaymentCode: "test-payment-code",
+					Name:        "test name",
+					Status:      "test-status",
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "with-error-in-producer",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						Create(gomock.Any(), gomock.Any()).
+						Return(nil)
+					return repo
+				}(),
+				Producer: func() producer.IPaymentCodeMessageProducer {
+					producer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
+					producer.
+						EXPECT().
+						Produce(gomock.Any()).
+						Return(err)
+					return producer
+				}(),
+			},
+			args: args{
+				ctx: context.TODO(),
+				paymentCode: &model.PaymentCode{
+					PaymentCode: "test-payment-code",
+					Name:        "test name",
+					Status:      "test-status",
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := PaymentCodeUseCase{
+				Repo:     tt.fields.Repo,
+				Producer: tt.fields.Producer,
+			}
+			if err := u.Create(tt.args.ctx, tt.args.paymentCode); (err != nil) != tt.wantErr {
+				t.Errorf("PaymentCodeUseCase.Create() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
-func TestCreateWithErrorInProducer(t *testing.T) {
+func TestPaymentCodeUseCase_Get(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	defer ctrl.Finish()
 
-	mRepo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
-	mProducer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
-
-	model := model.PaymentCode{
-		PaymentCode: "test-payment-code",
-		Name:        "test name",
-		Status:      "test-status",
-	}
-
-	err := errors.New("Mock Error")
-	mRepo.
-		EXPECT().
-		Create(gomock.Any(), gomock.Any()).
-		Return(nil)
-	mProducer.
-		EXPECT().
-		Produce(gomock.Any()).
-		Return(err)
-
-	usecase := PaymentCodeUseCase{Repo: mRepo, Producer: mProducer}
-
-	got := usecase.Create(context.TODO(), &model)
-
-	if got == nil {
-		t.Errorf("got %q, wanted error", got)
-	}
-}
-
-func TestGet(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	defer ctrl.Finish()
-
-	mRepo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
-	mProducer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
-
-	model := model.PaymentCode{
+	paymentCode := model.PaymentCode{
 		Id:          "test-id",
 		PaymentCode: "test-payment-code",
 		Name:        "test name",
 		Status:      "test-status",
 	}
-	mRepo.
-		EXPECT().
-		Get(gomock.Any(), "test-id").
-		Return(model, nil)
-	mProducer.
-		EXPECT().
-		Produce(gomock.Any()).
-		Return(nil)
+	emptyPaymentCode := model.PaymentCode{}
+	err := errors.New("Mock Error")
 
-	usecase := PaymentCodeUseCase{Repo: mRepo, Producer: mProducer}
-
-	got, err := usecase.Get(context.TODO(), "test-id")
-
-	if err != nil {
-		t.Errorf("got %q, wanted nil", got)
+	type fields struct {
+		Repo     repository.IPaymentCodeRepository
+		Producer producer.IPaymentCodeMessageProducer
 	}
-
-	if got != model {
-		t.Errorf("got %q, wanted %q", got, model)
+	type args struct {
+		ctx context.Context
+		id  string
 	}
-}
-func TestGetWithErrorInRepo(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	defer ctrl.Finish()
-
-	mRepo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
-	mProducer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
-
-	model := model.PaymentCode{}
-	mockErr := errors.New("Mock Error")
-	mRepo.
-		EXPECT().
-		Get(gomock.Any(), "test-id").
-		Return(model, mockErr)
-
-	usecase := PaymentCodeUseCase{Repo: mRepo, Producer: mProducer}
-
-	got, err := usecase.Get(context.TODO(), "test-id")
-
-	if err == nil {
-		t.Errorf("got %q, wanted nil", got)
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantP   model.PaymentCode
+		wantErr bool
+	}{
+		{
+			name: "get-success",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						Get(gomock.Any(), "test-id").
+						Return(paymentCode, nil)
+					return repo
+				}(),
+				Producer: func() producer.IPaymentCodeMessageProducer {
+					producer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
+					producer.
+						EXPECT().
+						Produce(gomock.Any()).
+						Return(nil)
+					return producer
+				}(),
+			},
+			args: args{
+				ctx: context.TODO(),
+				id:  "test-id",
+			},
+			wantP: paymentCode,
+		},
+		{
+			name: "get-error-from-repo",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						Get(gomock.Any(), "test-id").
+						Return(emptyPaymentCode, err)
+					return repo
+				}(),
+				Producer: func() producer.IPaymentCodeMessageProducer {
+					producer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
+					return producer
+				}(),
+			},
+			args: args{
+				ctx: context.TODO(),
+				id:  "test-id",
+			},
+			wantP:   emptyPaymentCode,
+			wantErr: true,
+		},
+		{
+			name: "get-error-from-producer",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						Get(gomock.Any(), "test-id").
+						Return(paymentCode, nil)
+					return repo
+				}(),
+				Producer: func() producer.IPaymentCodeMessageProducer {
+					producer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
+					producer.
+						EXPECT().
+						Produce(gomock.Any()).
+						Return(err)
+					return producer
+				}(),
+			},
+			args: args{
+				ctx: context.TODO(),
+				id:  "test-id",
+			},
+			wantP:   paymentCode,
+			wantErr: true,
+		},
 	}
-}
-
-func TestGetWithErrorInProducer(t *testing.T) {
-	ctrl := gomock.NewController(t)
-
-	defer ctrl.Finish()
-
-	mRepo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
-	mProducer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
-
-	model := model.PaymentCode{}
-	mockErr := errors.New("Mock Error")
-	mRepo.
-		EXPECT().
-		Get(gomock.Any(), "test-id").
-		Return(model, nil)
-	mProducer.
-		EXPECT().
-		Produce(gomock.Any()).
-		Return(mockErr)
-
-	usecase := PaymentCodeUseCase{Repo: mRepo, Producer: mProducer}
-
-	got, err := usecase.Get(context.TODO(), "test-id")
-
-	if err == nil {
-		t.Errorf("got %q, wanted nil", got)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := PaymentCodeUseCase{
+				Repo:     tt.fields.Repo,
+				Producer: tt.fields.Producer,
+			}
+			gotP, err := u.Get(tt.args.ctx, tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("PaymentCodeUseCase.Get() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotP, tt.wantP) {
+				t.Errorf("PaymentCodeUseCase.Get() = %v, want %v", gotP, tt.wantP)
+			}
+		})
 	}
 }

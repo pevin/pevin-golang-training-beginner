@@ -1,4 +1,4 @@
-package postgres_test
+package integration_test
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func TestSuitePaymentCodeRepository(t *testing.T) {
 	paymentCodeRepoSuite := &paymentCodeRepositoryTestSuite{
 		postgresTest.Suite{
 			DSN:                     dsn,
-			MigrationLocationFolder: "../db/migrations",
+			MigrationLocationFolder: "../../db/migrations",
 		},
 	}
 
