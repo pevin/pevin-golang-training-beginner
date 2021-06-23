@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"pevin-golang-training-beginner/model"
+
+	"github.com/pevin/pevin-golang-training-beginner/model"
 
 	_ "github.com/lib/pq"
 )

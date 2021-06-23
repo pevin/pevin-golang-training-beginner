@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"pevin-golang-training-beginner/model"
-	postgresTest "pevin-golang-training-beginner/postgres"
-	repository "pevin-golang-training-beginner/repository"
+	"github.com/pevin/pevin-golang-training-beginner/model"
+	postgresTest "github.com/pevin/pevin-golang-training-beginner/postgres"
+	repository "github.com/pevin/pevin-golang-training-beginner/repository"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"

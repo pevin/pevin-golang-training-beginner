@@ -5,14 +5,20 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"pevin-golang-training-beginner/model"
-	"pevin-golang-training-beginner/producer"
-	"pevin-golang-training-beginner/repository"
 	"time"
+
+	"github.com/pevin/pevin-golang-training-beginner/model"
+	"github.com/pevin/pevin-golang-training-beginner/producer"
+	"github.com/pevin/pevin-golang-training-beginner/repository"
 
 	"github.com/google/uuid"
 )
 
+type IPaymentCodeUseCase interface {
+	InitFromRequest(r *http.Request) (paymentCode model.PaymentCode, err error)
+	Create(ctx context.Context, p *model.PaymentCode) (err error)
+	Get(ctx context.Context, id string) (paymentCode model.PaymentCode, err error)
+}
 type PaymentCodeUseCase struct {
 	Repo     repository.IPaymentCodeRepository
 	Producer producer.IPaymentCodeMessageProducer

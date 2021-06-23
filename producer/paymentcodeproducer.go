@@ -1,7 +1,7 @@
 package producer
 
 import (
-	"pevin-golang-training-beginner/model"
+	"github.com/pevin/pevin-golang-training-beginner/model"
 )
 
 type IPaymentCodeMessageProducer interface {

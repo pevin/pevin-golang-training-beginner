@@ -3,13 +3,14 @@ package usecase
 import (
 	"context"
 	"errors"
-	mock_producer "pevin-golang-training-beginner/mock/producer"
-	mock_repository "pevin-golang-training-beginner/mock/repository"
-	"pevin-golang-training-beginner/model"
-	"pevin-golang-training-beginner/producer"
-	"pevin-golang-training-beginner/repository"
 	"reflect"
 	"testing"
+
+	mock_producer "github.com/pevin/pevin-golang-training-beginner/mock/producer"
+	mock_repository "github.com/pevin/pevin-golang-training-beginner/mock/repository"
+	"github.com/pevin/pevin-golang-training-beginner/model"
+	"github.com/pevin/pevin-golang-training-beginner/producer"
+	"github.com/pevin/pevin-golang-training-beginner/repository"
 
 	"github.com/golang/mock/gomock"
 )

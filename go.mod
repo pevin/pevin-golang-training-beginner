@@ -1,4 +1,4 @@
-module pevin-golang-training-beginner
+module github.com/pevin/pevin-golang-training-beginner
 
 go 1.16
 

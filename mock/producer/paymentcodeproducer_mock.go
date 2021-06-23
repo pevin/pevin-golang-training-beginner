@@ -5,7 +5,7 @@
 package mock_producer
 
 import (
-	model "pevin-golang-training-beginner/model"
+	model "github.com/pevin/pevin-golang-training-beginner/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

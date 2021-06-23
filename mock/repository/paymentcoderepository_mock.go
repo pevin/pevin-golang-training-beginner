@@ -6,7 +6,7 @@ package mock_repository
 
 import (
 	context "context"
-	model "pevin-golang-training-beginner/model"
+	model "github.com/pevin/pevin-golang-training-beginner/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
