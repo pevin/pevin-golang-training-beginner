@@ -18,6 +18,7 @@ type IPaymentCodeUseCase interface {
 	InitFromRequest(r *http.Request) (paymentCode model.PaymentCode, err error)
 	Create(ctx context.Context, p *model.PaymentCode) (err error)
 	Get(ctx context.Context, id string) (paymentCode model.PaymentCode, err error)
+	ExpireWithPassDueExpiryDate(ctx context.Context) (err error)
 }
 type PaymentCodeUseCase struct {
 	Repo     repository.IPaymentCodeRepository
@@ -69,6 +70,21 @@ func (u PaymentCodeUseCase) Get(ctx context.Context, id string) (p model.Payment
 	}
 
 	err = u.Producer.Produce(&p)
+
+	return
+}
+
+func (u PaymentCodeUseCase) ExpireWithPassDueExpiryDate(ctx context.Context) (err error) {
+	r, err := u.Repo.GetIdsToBeExpired(ctx)
+	if err != nil {
+		return
+	}
+	for _, id := range r {
+		err = u.Repo.UpdateStatusById(ctx, id, "EXPIRED")
+		if err != nil {
+			return
+		}
+	}
 
 	return
 }

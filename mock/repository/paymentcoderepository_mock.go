@@ -6,10 +6,10 @@ package mock_repository
 
 import (
 	context "context"
-	model "github.com/pevin/pevin-golang-training-beginner/model"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	model "github.com/pevin/pevin-golang-training-beginner/model"
 )
 
 // MockIPaymentCodeRepository is a mock of IPaymentCodeRepository interface.
@@ -62,4 +62,33 @@ func (m *MockIPaymentCodeRepository) Get(ctx context.Context, id string) (model.
 func (mr *MockIPaymentCodeRepositoryMockRecorder) Get(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIPaymentCodeRepository)(nil).Get), ctx, id)
+}
+
+// GetIdsToBeExpired mocks base method.
+func (m *MockIPaymentCodeRepository) GetIdsToBeExpired(ctx context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetIdsToBeExpired", ctx)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetIdsToBeExpired indicates an expected call of GetIdsToBeExpired.
+func (mr *MockIPaymentCodeRepositoryMockRecorder) GetIdsToBeExpired(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIdsToBeExpired", reflect.TypeOf((*MockIPaymentCodeRepository)(nil).GetIdsToBeExpired), ctx)
+}
+
+// UpdateStatusById mocks base method.
+func (m *MockIPaymentCodeRepository) UpdateStatusById(ctx context.Context, id, status string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateStatusById", ctx, id, status)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateStatusById indicates an expected call of UpdateStatusById.
+func (mr *MockIPaymentCodeRepositoryMockRecorder) UpdateStatusById(ctx, id, status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStatusById", reflect.TypeOf((*MockIPaymentCodeRepository)(nil).UpdateStatusById), ctx, id, status)
 }

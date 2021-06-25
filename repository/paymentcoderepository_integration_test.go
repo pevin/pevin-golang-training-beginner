@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/pevin/pevin-golang-training-beginner/model"
 	postgresTest "github.com/pevin/pevin-golang-training-beginner/postgres"
@@ -51,7 +52,7 @@ func CreatePaymentCodePayload() model.PaymentCode {
 		Id:          id.String(),
 		PaymentCode: "test-payment-code-" + id.String(),
 		Name:        "test name",
-		Status:      "test-status",
+		Status:      "ACTIVE",
 	}
 	return model
 }
@@ -136,6 +137,101 @@ func (s paymentCodeRepositoryTestSuite) TestGetPaymentCodeById() {
 				s.Require().Equal(tC.expectedResponse.PaymentCode, res.PaymentCode)
 				s.Require().Equal(tC.expectedResponse.Name, res.Name)
 			}
+		})
+	}
+}
+
+func (s paymentCodeRepositoryTestSuite) TestGetIdsToBeExpired() {
+	var ids []string
+
+	type seed func() []string
+	repo := repository.PaymentCodeRepository{Db: s.DBConn}
+
+	testCases := []struct {
+		desc          string
+		repo          repository.IPaymentCodeRepository
+		seed          seed
+		expectedError error
+		ctx           context.Context
+	}{
+		{
+			desc:          "no-ids-found",
+			repo:          repo,
+			expectedError: nil,
+			seed: func() []string {
+				return nil
+			},
+			ctx: context.TODO(),
+		},
+		{
+			desc: "get-success",
+			repo: repo,
+			seed: func() []string {
+				yesterday := time.Now().AddDate(0, 0, -5).UTC()
+				mockPaymentCode := CreatePaymentCodePayload()
+				mockPaymentCode.ExpirationDate = yesterday
+				err := repo.Create(context.TODO(), &mockPaymentCode)
+				if err != nil {
+					s.Fail("Error in creating seed settings", err)
+				}
+				ids = append(ids, mockPaymentCode.Id)
+
+				mockPaymentCode = CreatePaymentCodePayload()
+				mockPaymentCode.ExpirationDate = yesterday
+				err = repo.Create(context.TODO(), &mockPaymentCode)
+				if err != nil {
+					s.Fail("Error in creating seed settings", err)
+				}
+				ids = append(ids, mockPaymentCode.Id)
+				return ids
+			},
+			expectedError: nil,
+			ctx:           context.TODO(),
+		},
+	}
+
+	for _, tC := range testCases {
+		// Run tests
+		s.T().Run(tC.desc, func(t *testing.T) {
+			seededIds := tC.seed()
+			res, err := tC.repo.GetIdsToBeExpired(tC.ctx)
+			s.Require().Equal(tC.expectedError, err)
+
+			if err == nil {
+				s.Require().Equal(seededIds, res)
+			}
+		})
+	}
+}
+func (s paymentCodeRepositoryTestSuite) TestUpdatePaymentCodeStatusById() {
+	mockPaymentCode := CreatePaymentCodePayload()
+
+	repo := repository.PaymentCodeRepository{Db: s.DBConn}
+	err := repo.Create(context.TODO(), &mockPaymentCode)
+	if err != nil {
+		s.Fail("Error in creating seed settings", err)
+	}
+
+	testCases := []struct {
+		desc        string
+		repo        repository.IPaymentCodeRepository
+		expectedErr error
+		ctx         context.Context
+		paymentCode *model.PaymentCode
+	}{
+		{
+			desc:        "update-success",
+			repo:        repo,
+			expectedErr: nil,
+			ctx:         context.TODO(),
+			paymentCode: &mockPaymentCode,
+		},
+	}
+
+	for _, tC := range testCases {
+		s.T().Run(tC.desc, func(t *testing.T) {
+			err := tC.repo.UpdateStatusById(tC.ctx, tC.paymentCode.Id, "EXPIRED")
+			s.Require().Equal(tC.expectedErr, err)
 		})
 	}
 }

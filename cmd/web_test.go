@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 	"github.com/pevin/pevin-golang-training-beginner/usecase"
 )
 
-func TestPaymentCodeHandler_createPaymentCode(t *testing.T) {
+func TestWebPaymentCodeHandler_createPaymentCode(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	defer ctrl.Finish()
@@ -155,7 +155,7 @@ func TestPaymentCodeHandler_createPaymentCode(t *testing.T) {
 	}
 }
 
-func TestPaymentCodeHandler_getPaymentCodeHandler(t *testing.T) {
+func TestWebPaymentCodeHandler_getPaymentCodeHandler(t *testing.T) {
 	type fields struct {
 		Usecase usecase.IPaymentCodeUseCase
 	}
