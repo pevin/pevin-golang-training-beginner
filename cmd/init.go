@@ -19,7 +19,7 @@ func initPaymentUsecase() usecase.IPaymentCodeUseCase {
 }
 
 func initDb() *sql.DB {
-	dbHost := getEnv("DB_HOST", "localhost")
+	dbHost := getEnv("DB_HOST", "127.0.0.1")
 	dbPort := getEnv("DB_PORT", "5432")
 	dbUser := getEnv("DB_USER", "postgres")
 	dbPass := getEnv("DB_PASS", "postgres")

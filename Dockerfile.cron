@@ -1,0 +1,9 @@
+FROM alpine
+
+WORKDIR /app
+
+COPY engine .
+
+RUN echo '*  *  *  *  *    /app/engine cron > /dev/stdout' > /etc/crontabs/root
+
+CMD ["crond", "-f"]
