@@ -6,11 +6,11 @@ package mock_usecase
 
 import (
 	context "context"
-	model "github.com/pevin/pevin-golang-training-beginner/model"
 	http "net/http"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	model "github.com/pevin/pevin-golang-training-beginner/model"
 )
 
 // MockIPaymentCodeUseCase is a mock of IPaymentCodeUseCase interface.
@@ -48,6 +48,20 @@ func (m *MockIPaymentCodeUseCase) Create(ctx context.Context, p *model.PaymentCo
 func (mr *MockIPaymentCodeUseCaseMockRecorder) Create(ctx, p interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockIPaymentCodeUseCase)(nil).Create), ctx, p)
+}
+
+// ExpireWithPassDueExpiryDate mocks base method.
+func (m *MockIPaymentCodeUseCase) ExpireWithPassDueExpiryDate(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExpireWithPassDueExpiryDate", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ExpireWithPassDueExpiryDate indicates an expected call of ExpireWithPassDueExpiryDate.
+func (mr *MockIPaymentCodeUseCaseMockRecorder) ExpireWithPassDueExpiryDate(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExpireWithPassDueExpiryDate", reflect.TypeOf((*MockIPaymentCodeUseCase)(nil).ExpireWithPassDueExpiryDate), ctx)
 }
 
 // Get mocks base method.

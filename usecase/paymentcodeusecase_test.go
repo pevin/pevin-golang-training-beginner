@@ -6,13 +6,12 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	mock_producer "github.com/pevin/pevin-golang-training-beginner/mock/producer"
 	mock_repository "github.com/pevin/pevin-golang-training-beginner/mock/repository"
 	"github.com/pevin/pevin-golang-training-beginner/model"
 	"github.com/pevin/pevin-golang-training-beginner/producer"
 	"github.com/pevin/pevin-golang-training-beginner/repository"
-
-	"github.com/golang/mock/gomock"
 )
 
 func TestPaymentCodeUseCase_Create(t *testing.T) {
@@ -253,6 +252,127 @@ func TestPaymentCodeUseCase_Get(t *testing.T) {
 			}
 			if !reflect.DeepEqual(gotP, tt.wantP) {
 				t.Errorf("PaymentCodeUseCase.Get() = %v, want %v", gotP, tt.wantP)
+			}
+		})
+	}
+}
+
+func TestPaymentCodeUseCase_ExpireWithPassDueExpiryDate(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	defer ctrl.Finish()
+	mProducer := mock_producer.NewMockIPaymentCodeMessageProducer(ctrl)
+
+	ids := []string{"1234-1234-1234-1234", "4321-4321-4321-4321"}
+	type fields struct {
+		Repo     repository.IPaymentCodeRepository
+		Producer producer.IPaymentCodeMessageProducer
+	}
+	type args struct {
+		ctx context.Context
+	}
+	mockErr := errors.New("Mock Error")
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "get-success",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						GetIdsToBeExpired(gomock.Any()).
+						Return(ids, nil)
+					repo.
+						EXPECT().
+						UpdateStatusById(gomock.Any(), ids[0], "EXPIRED").
+						Return(nil)
+					repo.
+						EXPECT().
+						UpdateStatusById(gomock.Any(), ids[1], "EXPIRED").
+						Return(nil)
+					return repo
+				}(),
+				Producer: mProducer,
+			},
+			args: args{
+				ctx: context.TODO(),
+			},
+		},
+		{
+			name: "get-no-payment-codes-to-be-expired",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						GetIdsToBeExpired(gomock.Any()).
+						Return(nil, nil)
+					return repo
+				}(),
+				Producer: mProducer,
+			},
+			args: args{
+				ctx: context.TODO(),
+			},
+		},
+		{
+			name: "get-error-from-get-ids-to-be-expired",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						GetIdsToBeExpired(gomock.Any()).
+						Return(nil, mockErr)
+					return repo
+				}(),
+				Producer: mProducer,
+			},
+			args: args{
+				ctx: context.TODO(),
+			},
+			wantErr: true,
+		},
+		{
+			name: "get-error-from-second-update-status-by-id",
+			fields: fields{
+				Repo: func() repository.IPaymentCodeRepository {
+					repo := mock_repository.NewMockIPaymentCodeRepository(ctrl)
+					repo.
+						EXPECT().
+						GetIdsToBeExpired(gomock.Any()).
+						Return(ids, nil)
+					repo.
+						EXPECT().
+						UpdateStatusById(gomock.Any(), ids[0], "EXPIRED").
+						Return(nil)
+					repo.
+						EXPECT().
+						UpdateStatusById(gomock.Any(), ids[1], "EXPIRED").
+						Return(mockErr)
+					return repo
+				}(),
+				Producer: mProducer,
+			},
+			args: args{
+				ctx: context.TODO(),
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			u := PaymentCodeUseCase{
+				Repo:     tt.fields.Repo,
+				Producer: tt.fields.Producer,
+			}
+			if err := u.ExpireWithPassDueExpiryDate(tt.args.ctx); (err != nil) != tt.wantErr {
+				t.Errorf("PaymentCodeUseCase.ExpireWithPassDueExpiryDate() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

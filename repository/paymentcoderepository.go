@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/pevin/pevin-golang-training-beginner/model"
 
@@ -13,6 +14,8 @@ import (
 type IPaymentCodeRepository interface {
 	Create(ctx context.Context, p *model.PaymentCode) (err error)
 	Get(ctx context.Context, id string) (paymentCode model.PaymentCode, err error)
+	GetIdsToBeExpired(ctx context.Context) (ids []string, err error)
+	UpdateStatusById(ctx context.Context, id string, status string) (err error)
 }
 
 type PaymentCodeRepository struct {
@@ -63,6 +66,54 @@ func (r PaymentCodeRepository) Get(ctx context.Context, id string) (paymentCode 
 			log.Fatal(err)
 		}
 		return
+	}
+
+	return
+}
+
+func (r PaymentCodeRepository) UpdateStatusById(ctx context.Context, id string, status string) (err error) {
+	res, err := r.Db.ExecContext(
+		context.Background(),
+		"UPDATE payment_codes SET status=$2 WHERE id=$1",
+		id, status,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	rowAffected, err := res.RowsAffected()
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	if rowAffected != 1 {
+		log.Fatalf("Expected row affected equal to 1 but got %d", rowAffected)
+		return
+	}
+
+	return
+}
+
+// This method will fetch all payment code ids with ACTIVE status and due expired date
+func (r PaymentCodeRepository) GetIdsToBeExpired(ctx context.Context) (ids []string, err error) {
+	now := time.Now().UTC()
+	rows, err := r.Db.QueryContext(context.Background(), "SELECT id FROM payment_codes where expiration_date <= $1 and status = $2", now, "ACTIVE")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			log.Fatal(err)
+		}
+		ids = append(ids, id)
 	}
 
 	return
