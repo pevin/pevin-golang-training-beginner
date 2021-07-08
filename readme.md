@@ -2,38 +2,19 @@
 
 Held by xendit peeps :)
 
-## Instruction on how to execute `rest` command with docker
-
-### Build Go app
-
-```
-GOOS=linux GARCH=amd64 go build -o engine .
-```
+## Instruction on how to run app thru docker
 
 ### Build Docker Image
 ```
-docker build -t test-image-name . -f Dockerfile.rest
+docker build -t test-image-name .
 ```
 
-### Run the app
+### Run the app - rest
 ```
 docker run -t test-image-name
 ```
 
-## Instruction on how to execute `cron` command with docker
-
-### Build Go app
-
+### Run the app - cron
 ```
-GOOS=linux GARCH=amd64 go build -o engine .
-```
-
-### Build Docker Image
-```
-docker build -t test-image-name . -f Dockerfile.cron
-```
-
-### Run the app
-```
-docker run -t test-image-name
+docker run -t test-image-name /app/run_cron_entrypoint.sh
 ```

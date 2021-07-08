@@ -1,8 +1,0 @@
-FROM alpine
-
-WORKDIR /app
-
-COPY engine .
-
-EXPOSE 8080
-ENTRYPOINT ["/app/engine", "rest"]
