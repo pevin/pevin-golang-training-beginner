@@ -11,9 +11,12 @@ import (
 type WebCommand struct{}
 
 func (c *WebCommand) Execute() {
-	paymentcodeHandler := httpdelivery.NewPaymentCodeRouteHandler(initPaymentUsecase())
+	paymentcodeHandler := httpdelivery.NewPaymentCodeRouteHandler(initPaymentCodeUsecase())
 	http.HandleFunc("/payment-codes", paymentcodeHandler.PaymentCodeRouteHandler)
 	http.HandleFunc("/payment-codes/", paymentcodeHandler.PaymentCodeRouteHandler)
+
+	inquiryHandler := httpdelivery.NewInquiryRouteHandler(initInquiryUsecase())
+	http.HandleFunc("/inquiry", inquiryHandler.InquiryRouteHandler)
 
 	http.HandleFunc("/health", httpdelivery.HealthHandler)
 	http.HandleFunc("/hello-world", httpdelivery.HelloWorldHandler)

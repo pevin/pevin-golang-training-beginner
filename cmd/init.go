@@ -10,12 +10,19 @@ import (
 	"github.com/pevin/pevin-golang-training-beginner/usecase"
 )
 
-func initPaymentUsecase() usecase.IPaymentCodeUseCase {
+func initPaymentCodeUsecase() usecase.IPaymentCodeUseCase {
 	pcRepo := repository.PaymentCodeRepository{Db: initDb()}
 	pcProducer := producer.PaymentCodeMessageProducer{}
 	pcUsecase := usecase.PaymentCodeUseCase{Repo: pcRepo, Producer: pcProducer}
 
 	return pcUsecase
+}
+
+func initInquiryUsecase() usecase.IInquiryUseCase {
+	iRepo := repository.InquiryRepository{Db: initDb()}
+	iUsecase := usecase.InquiryUseCase{Repo: iRepo}
+
+	return iUsecase
 }
 
 func initDb() *sql.DB {
