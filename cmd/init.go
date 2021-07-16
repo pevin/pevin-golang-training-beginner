@@ -24,6 +24,12 @@ func initInquiryUsecase() usecase.IInquiryUseCase {
 
 	return iUsecase
 }
+func initPaymentUsecase() usecase.IPaymentUseCase {
+	pRepo := repository.PaymentRepository{Db: initDb()}
+	pUsecase := usecase.PaymentUseCase{Repo: pRepo}
+
+	return pUsecase
+}
 
 func initDb() *sql.DB {
 	dbHost := getEnv("DB_HOST", "127.0.0.1")

@@ -21,13 +21,13 @@ type PaymentUseCase struct {
 	Repo repository.IPaymentRepository
 }
 
-func (u PaymentUseCase) InitFromRequest(r *http.Request) (inquiry model.Payment, err error) {
+func (u PaymentUseCase) InitFromRequest(r *http.Request) (payment model.Payment, err error) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return
 	}
 
-	json.Unmarshal([]byte(body), &inquiry)
+	json.Unmarshal([]byte(body), &payment)
 
 	return
 }

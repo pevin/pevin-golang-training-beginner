@@ -15,8 +15,12 @@ func (c *WebCommand) Execute() {
 	http.HandleFunc("/payment-codes", paymentcodeHandler.PaymentCodeRouteHandler)
 	http.HandleFunc("/payment-codes/", paymentcodeHandler.PaymentCodeRouteHandler)
 
-	inquiryHandler := httpdelivery.NewInquiryRouteHandler(initInquiryUsecase())
+	inquiryUsecase := initInquiryUsecase()
+	inquiryHandler := httpdelivery.NewInquiryRouteHandler(inquiryUsecase)
 	http.HandleFunc("/inquiry", inquiryHandler.InquiryRouteHandler)
+
+	paymentHandler := httpdelivery.NewPaymentRouteHandler(inquiryUsecase, initPaymentUsecase())
+	http.HandleFunc("/payment", paymentHandler.PaymentRouteHandler)
 
 	http.HandleFunc("/health", httpdelivery.HealthHandler)
 	http.HandleFunc("/hello-world", httpdelivery.HelloWorldHandler)
