@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/Kount/pq-timeouts v1.0.0
+	github.com/aws/aws-sdk-go v1.40.5
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/golang/mock v1.5.0 // indirect
