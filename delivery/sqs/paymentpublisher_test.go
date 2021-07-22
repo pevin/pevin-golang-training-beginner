@@ -10,6 +10,7 @@ import (
 	"github.com/pevin/pevin-golang-training-beginner/model"
 )
 
+// Integration test with AWS SQS
 func TestPaymentPublisher_Publish(t *testing.T) {
 	queue, region, endpoint := getSqsEnvVars()
 

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pevin/pevin-golang-training-beginner/delivery/sqs"
 	"github.com/pevin/pevin-golang-training-beginner/model"
 	"github.com/pevin/pevin-golang-training-beginner/repository"
 
@@ -18,7 +19,8 @@ type IPaymentUseCase interface {
 	Create(ctx context.Context, p *model.Payment) (err error)
 }
 type PaymentUseCase struct {
-	Repo repository.IPaymentRepository
+	Repo      repository.IPaymentRepository
+	Publisher sqs.IPaymentPublisher
 }
 
 func (u PaymentUseCase) InitFromRequest(r *http.Request) (payment model.Payment, err error) {
@@ -48,6 +50,8 @@ func (u PaymentUseCase) Create(ctx context.Context, payment *model.Payment) (err
 	if err != nil {
 		return
 	}
+
+	err = u.Publisher.Publish(*payment)
 
 	return
 }
