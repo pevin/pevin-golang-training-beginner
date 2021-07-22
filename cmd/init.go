@@ -5,17 +5,59 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+
+	"github.com/pevin/pevin-golang-training-beginner/delivery/sqs"
 	"github.com/pevin/pevin-golang-training-beginner/producer"
 	"github.com/pevin/pevin-golang-training-beginner/repository"
 	"github.com/pevin/pevin-golang-training-beginner/usecase"
 )
 
-func initPaymentUsecase() usecase.IPaymentCodeUseCase {
+func initPaymentCodeUsecase() usecase.IPaymentCodeUseCase {
 	pcRepo := repository.PaymentCodeRepository{Db: initDb()}
 	pcProducer := producer.PaymentCodeMessageProducer{}
 	pcUsecase := usecase.PaymentCodeUseCase{Repo: pcRepo, Producer: pcProducer}
 
 	return pcUsecase
+}
+
+func initInquiryUsecase() usecase.IInquiryUseCase {
+	iRepo := repository.InquiryRepository{Db: initDb()}
+	iUsecase := usecase.InquiryUseCase{Repo: iRepo}
+
+	return iUsecase
+}
+
+func initPaymentUsecase() usecase.IPaymentUseCase {
+	pRepo := repository.PaymentRepository{Db: initDb()}
+
+	sess := initAwsSession()
+	queue := getEnv("SQS_QUEUE_NAME", "payment_queue")
+	pPublisher, err := sqs.NewPaymentPublisher(sess, &queue)
+
+	if err != nil {
+		panic(err)
+	}
+
+	pUsecase := usecase.PaymentUseCase{Repo: pRepo, Publisher: pPublisher}
+
+	return pUsecase
+}
+
+func initAwsSession() *session.Session {
+	region := getEnv("SQS_AWS_REGION", "ap-southeast-2")
+	endpoint := getEnv("SQS_ENDPOINT", "http://localhost:4566/000000000000/payment_queue")
+
+	sess, err := session.NewSession(&aws.Config{
+		Region:   &region,
+		Endpoint: &endpoint,
+	})
+
+	if err != nil {
+		panic(err)
+	}
+	return sess
 }
 
 func initDb() *sql.DB {
